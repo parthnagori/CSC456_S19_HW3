@@ -37,21 +37,22 @@ int cuda_sort(int number_of_elements, float *a)
   cudaMalloc((void **) &arr, sizeof(float)*number_of_elements);
   cudaMemcpy(arr, a, sizeof(float)*number_of_elements, cudaMemcpyHostToDevice);
 
-  int threads_create = 512;
-  int blocks_create = number_of_elements/512;
-  //  if(number_of_elements % 512 == 0)
-  // {
-  //   threads_create = 512;
-  //   blocks_create = number_of_elements/512;
-  // }
-  //   else if(number_of_elements < 512){
-  //   threads_create =number_of_elements;
-  //   blocks_create = 1;
-  // }
-  //   else{
-  // threads_create = number_of_elements%512;
-  // blocks_create = number_of_elements/512;
-  // }
+  int threads_create = 0;
+  int blocks_create = 0;
+   if(number_of_elements % 512 == 0)
+  {
+    threads_create = 512;
+    blocks_create = number_of_elements/512;
+  }
+    else if(number_of_elements < 512){
+    threads_create =number_of_elements;
+    blocks_create = 1;
+  }
+    else{
+  threads_create = number_of_elements%512;
+  blocks_create = number_of_elements/512;
+  }
+  printf("threads : %d, blocks: %d", threads_create, blocks_create);
   dim3 blocks(blocks_create,1);    /* Number of blocks   */
   dim3 threads(threads_create,1);  /* Number of threads  */
 
