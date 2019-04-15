@@ -4,7 +4,7 @@
   #endif
 
 
-__global__ void bitonic_sort_step(float *gpu_val, int j, int k)
+__global__ void bitonic_sort_step(float *arr, int j, int k)
 {
   unsigned int i, ij; 
     i = threadIdx.x + blockDim.x * blockIdx.x;
@@ -12,31 +12,31 @@ __global__ void bitonic_sort_step(float *gpu_val, int j, int k)
 
   if ((ij)>i) {
     if ((i&k)==0) {
-      if (gpu_val[i]>gpu_val[ij]) {
-        float temp = gpu_val[i];
-        gpu_val[i] = gpu_val[ij];
-        gpu_val[ij] = temp;
+      if (arr[i]>arr[ij]) {
+        float temp = arr[i];
+        arr[i] = arr[ij];
+        arr[ij] = temp;
       }
     }
     if ((i&k)!=0) {
-      if (gpu_val[i]<gpu_val[ij]) {
-        float temp = gpu_val[i];
-        gpu_val[i] = gpu_val[ij];
-        gpu_val[ij] = temp;
+      if (arr[i]<arr[ij]) {
+        float temp = arr[i];
+        arr[i] = arr[ij];
+        arr[ij] = temp;
       }
     }
   }
 }
 
 
-int cuda_sort(int number_of_elements, float *values)
+int cuda_sort(int number_of_elements, float *a)
 {
   
-  float *gpu_arr;
+  float *arr;
   size_t size = number_of_elements * sizeof(float);
 
-  cudaMalloc((void**) &gpu_arr, size);
-  cudaMemcpy(gpu_arr, values, size, cudaMemcpyHostToDevice);
+  cudaMalloc((void**) &arr, number_of_elements * sizeof(float));
+  cudaMemcpy(arr, a, number_of_elements * sizeof(float), cudaMemcpyHostToDevice);
   
   int threads_create = 0;
   int blocks_create = 0;
@@ -59,11 +59,11 @@ int cuda_sort(int number_of_elements, float *values)
   int l, m;
   for (l = 2; l <= number_of_elements; l <<= 1) {
     for (m=l>>1; m>0; m=m>>1) {
-      bitonic_sort_step<<<blocks, threads>>>(gpu_arr, m, l);
+      bitonic_sort_step<<<blocks, threads>>>(arr, m, l);
     }
   }
-  cudaMemcpy(values, gpu_arr, size, cudaMemcpyDeviceToHost);
-  cudaFree(gpu_arr);
+  cudaMemcpy(a, arr, number_of_elements * sizeof(float), cudaMemcpyDeviceToHost);
+  cudaFree(arr);
 
   return 0;
 }
