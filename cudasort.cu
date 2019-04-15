@@ -73,6 +73,8 @@ int cuda_sort(int number_of_elements, float *a)
     cnt+=1; 
   }
 
+  cudaMemcpy(a, final, sizeof(float)*number_of_elements, cudaMemcpyDeviceToHost);
+  // cudaFree(gpu_arr);
   cudaThreadSynchronize();
   cudaEventSynchronize(event);
   
