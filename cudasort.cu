@@ -45,11 +45,9 @@ __global__ void merge_sort(float* arr, float* final, int numberOfBlocks, int ele
     int block_id = blockIdx.x;
     int start = block_id * partition;
     int n = numberOfBlocks*elementsPerBlock;
-    if (start < n){
-      int end = min(start + partition,n);
-      int mid = min(start + partition/2,n);
-      merge(arr, final, start, mid, end);
-    }
+    int end = min(start + partition,n);
+    int mid = min(start + partition/2,n);
+    merge(arr, final, start, mid, end);
 }
 
 int cuda_sort(int number_of_elements, float *a)
@@ -70,7 +68,7 @@ int cuda_sort(int number_of_elements, float *a)
   cudaMalloc((void **) &final, sizeof(float)*number_of_elements);
   cudaMemcpy(arr, a, sizeof(float)*number_of_elements, cudaMemcpyHostToDevice);
 
-  dim3 dimGrid(numberOfBlocks);
+  dim3 dimGrid(elementsPerBlock);
   dim3 dimBlock(1);
 
   int partition;
