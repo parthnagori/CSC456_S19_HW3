@@ -52,8 +52,8 @@ int cuda_sort(int number_of_elements, float *a)
   // threads_create = number_of_elements%512;
   // blocks_create = number_of_elements/512;
   // }
-  dim3 blocks(blocks_create);    /* Number of blocks   */
-  dim3 threads(threads_create);  /* Number of threads  */
+  dim3 blocks(blocks_create,1);    /* Number of blocks   */
+  dim3 threads(threads_create,1);  /* Number of threads  */
 
   int l, m;
   for (l = 2; l <= number_of_elements; l <<= 1) {
