@@ -42,7 +42,7 @@ __device__ void merge(float* arr, float* final, int start, int mid, int end)
 
 __global__ void merge_sort(float* arr, float* final, int numberOfBlocks, int elementsPerBlock, int partition){
 
-    int block_id = threadIdx.x + blockIdx.x * blockDim.x;
+    int block_id = blockIdx.x;
     int start = block_id * partition;
     int n = numberOfBlocks*elementsPerBlock;
     if (start < n){
