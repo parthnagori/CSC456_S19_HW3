@@ -14,7 +14,10 @@ __device__ void merge(float* arr, float* final, int start, int mid, int end)
 {
     int i = start;
     int j = mid;
-    for (int k = start; k < end; k++){
+    int k = start;
+    print("start : %d mid: %d end: %d", start, mid, end);
+    while (k < end)
+    {
       if (i==mid){
         final[k] = arr[j++];
       }
@@ -27,15 +30,20 @@ __device__ void merge(float* arr, float* final, int start, int mid, int end)
       else{
         final[k] = arr[j++];
       }
+      k++;
     }
+
+
+
+
 }
 
 __global__ void merge_sort(float* arr, float* final, int numberOfBlocks, int elementsPerBlock, int partition){
 
     int block_id = blockIdx.x;   
     int start = block_id * partition;
-    int end = min(start + partition, numberOfBlocks*elementsPerBlock) ;
-    int mid = min(start + partition/2, numberOfBlocks*elementsPerBlock);
+    int end = start + partition;
+    int mid = start + partition/2;
 
     merge(arr, final, start, mid, end);
 }
