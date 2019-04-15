@@ -44,21 +44,9 @@ int cuda_sort(int number_of_elements, float *a)
   cudaMalloc((void**) &arr, number_of_elements * sizeof(float));
   cudaMemcpy(arr, a, number_of_elements * sizeof(float), cudaMemcpyHostToDevice);
   
-  int thread_cnt = 0;
-  int block_cnt = 0;
-   if(number_of_elements % 512 == 0)
-  {
-    thread_cnt = 512;
-    block_cnt = number_of_elements/512;
-  }
-  //   else if(number_of_elements < 512){
-  //   thread_cnt =number_of_elements;
-  //   block_cnt = 1;
-  // }
-  //   else{
-  // thread_cnt = number_of_elements%512;
-  // block_cnt = number_of_elements/512;
-  // }
+  int thread_cnt = 512;
+  int block_cnt = number_of_elements/512;
+  
   dim3 blocks_per_grid(block_cnt,1);    /* Number of blocks   */
   dim3 threads_per_block(thread_cnt,1);  /* Number of threads  */
 
