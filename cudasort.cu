@@ -16,16 +16,16 @@ __device__ void merge(float* arr, float* final, int start, int mid, int end)
     int j = mid;
     for (int k = start; k < end; k++){
       if (i==mid){
-        final[k] = arr[j++]
+        final[k] = arr[j++];
       }
       else if (j == end){
-        final[k] = arr[i++]
+        final[k] = arr[i++];
       }
       else if (arr[i] < arr[j]){
-        final[k] = arr[i++]
+        final[k] = arr[i++];
       }
       else{
-        final[k] = arr[j++]
+        final[k] = arr[j++];
       }
     }
 }
