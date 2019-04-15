@@ -55,8 +55,8 @@ int cuda_sort(int number_of_elements, float *a)
   
   float *arr;
   float *final;
-  int n;
-  int part = 0;
+  // int n;
+  // int part = 0;
 
   int numberOfBlocks = 512;
   int elementsPerBlock = number_of_elements/numberOfBlocks;
@@ -95,7 +95,7 @@ int cuda_sort(int number_of_elements, float *a)
     cnt+=1; 
   }
 
-  print("cnt: %d", cnt);
+  printf("cnt: %d", cnt);
   cudaMemcpy(a, final, sizeof(float)*number_of_elements, cudaMemcpyDeviceToHost);
   // cudaFree(gpu_arr);
   cudaThreadSynchronize();
