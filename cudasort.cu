@@ -89,6 +89,7 @@ int cuda_sort(int number_of_elements, float *a)
 
 
   for (partition = 2; partition < 2*number_of_elements; partition*=2) {
+    if (cnt%2 == 0)
       merge_sort<<<dimGrid, dimBlock>>>(arr, final, numberOfBlocks, elementsPerBlock, partition); 
     else
       merge_sort<<<dimGrid, dimBlock>>>(final, arr, numberOfBlocks, elementsPerBlock, partition);
