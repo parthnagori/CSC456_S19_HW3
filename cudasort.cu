@@ -15,7 +15,7 @@ __device__ void merge(float* arr, float* final, int start, int mid, int end)
     int i = start;
     int j = mid;
     int k = start;
-    printf("start : %d mid: %d end: %d", start, mid, end);
+    // printf("start : %d mid: %d end: %d", start, mid, end);
     while (k < end)
     {
       if (i==mid){
@@ -33,17 +33,20 @@ __device__ void merge(float* arr, float* final, int start, int mid, int end)
       k++;
     }
 
-
-
+    for(i = start; i < end; i++)
+    {
+      arr[i] = final[i];
+    }
 
 }
 
 __global__ void merge_sort(float* arr, float* final, int numberOfBlocks, int elementsPerBlock, int partition){
 
-    int block_id = blockIdx.x;   
+    int n = numberOfBlocks * elementsPerBlock;
+    int block_id = threadIdx.x + blockIdx.x * blockDim.x;
     int start = block_id * partition;
-    int end = start + partition;
-    int mid = start + partition/2;
+    int end = min(start + partition, n) ;
+    int mid = min(start + partition/2, n);
 
     merge(arr, final, start, mid, end);
 }
@@ -70,18 +73,30 @@ int cuda_sort(int number_of_elements, float *a)
   dim3 dimBlock(1);
 
   int partition;
-  // int partition_size;
+  // int partitions;
 
-  int cnt = 0;
+  // int cnt = 0;
+  // n = number_of_elements;
+  // while (n != 0){
+  //   ++partitions;
+  //   n/=2;
+  // } 
+
+
+  // for (part = 0; part < partitions; part++){
+  //   int part_size = part << 1;
+  //   merge_sort<<<dimGrid, dimBlock>>>(arr, final, numberOfBlocks, elementsPerBlock, part); 
+  // } 
+
+
   for (partition = 2; partition < 2*number_of_elements; partition*=2) {
-    if ((cnt % 2) == 0)
-      merge_sort<<<dimGrid, dimBlock>>>(arr, final, numberOfBlocks, elementsPerBlock, partition); 
-    else
-      merge_sort<<<dimGrid, dimBlock>>>(final, arr, numberOfBlocks, elementsPerBlock, partition);
-    cnt+=1; 
+    merge_sort<<<dimGrid, dimBlock>>>(arr, final, numberOfBlocks, elementsPerBlock, partition); 
+    // else
+    //   merge_sort<<<dimGrid, dimBlock>>>(final, arr, numberOfBlocks, elementsPerBlock, partition);
+    // cnt+=1; 
   }
 
-  cudaMemcpy(a, final, sizeof(float)*number_of_elements, cudaMemcpyDeviceToHost);
+  cudaMemcpy(a, arr, sizeof(float)*number_of_elements, cudaMemcpyDeviceToHost);
   // cudaFree(gpu_arr);
   cudaThreadSynchronize();
   cudaEventSynchronize(event);
