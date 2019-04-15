@@ -10,90 +10,97 @@ extern "C"
 {
 #endif
 
-__global__ void
-gpu_sort(int N, float *input, float *tmp, int x)
+__device__ void merge(float* arr, float* final, int start, int mid, int end)
 {
-  // get the index of the current thread
-  int y = blockIdx.x*blockDim.x + threadIdx.x;
-  
-  if (y < N && (y % (1 << (x+1)) == 0))
-  {
-    unsigned width = 1 << x;
-
-    int left, middle, right;
-
-  left = y;
-  middle = y + width;
-  right = y + 2*width;
-
-  // merge function
-  int i, j, k;
-  i = left;
-  j = middle;
-  k = left;
-
-  while(i < middle || j < right)
-  {
-    if (i < middle && j < right)
+    int i = start;
+    int j = mid;
+    int k = start;
+    // printf("start : %d mid: %d end: %d", start, mid, end);
+    while (k < end)
     {
-      if (input[i] < input[j])
-      {
-        tmp[k++] = input[i++];
+      if (i==mid){
+        final[k] = arr[j++];
       }
-      else
-      {
-        tmp[k++] = input[j++];
+      else if (j == end){
+        final[k] = arr[i++];
       }
+      else if (arr[i] < arr[j]){
+        final[k] = arr[i++];
+      }
+      else{
+        final[k] = arr[j++];
+      }
+      k++;
     }
-    else if (i == middle)
-    {
-      tmp[k++] = input[j++];
-    }
-    else if (j == right)
-    {
-      tmp[k++] = input[i++];
-    }
-  }
 
-  // copy tmp back into input
-  for(i = left; i < right; i++)
-  {
-    input[i] = tmp[i];
-  }
-  }
+    // for(i = start; i < end; i++)
+    // {
+    //   arr[i] = final[i];
+    // }
+
+}
+
+__global__ void merge_sort(float* arr, float* final, int numberOfBlocks, int elementsPerBlock, int partition){
+
+    int block_id = blockIdx.x;
+    int start = block_id * partition;
+    int n = numberOfBlocks*elementsPerBlock;
+    int end = min(start + partition,n);
+    int mid = min(start + partition/2,n);
+    merge(arr, final, start, mid, end);
 }
 
 int cuda_sort(int number_of_elements, float *a)
 {
-  float *input_buf, *tmp_buf;
-
-  // allocate device memory
-  cudaMalloc( (void **) &input_buf, sizeof(float) * number_of_elements );
-  cudaMalloc( (void **) &tmp_buf, sizeof(float) * number_of_elements);
-
-  // move elements of a to the CUDA device
-  cudaMemcpy( input_buf, a, sizeof(float) * number_of_elements, cudaMemcpyHostToDevice );
-
-  unsigned blocks_per_grid = (number_of_elements + THREADS - 1) / THREADS;
   
-  // determine what log2(N) is
-  unsigned num_widths = 0;
-  unsigned N = number_of_elements;
-  while (N >>= 1) ++num_widths;
+  float *arr;
+  float *final;
+  int n;
+  int part = 0;
 
-  // launch the kernel log2(N) times, each time setting a different
-  // value for the 3rd kernel arguments. This value will be used to determine
-  // the width of subarrays that the kernel should merge
-  for (unsigned i = 0; i < num_widths; ++i)
-  {
-    gpu_sort<<<blocks_per_grid, THREADS>>>(number_of_elements, input_buf, tmp_buf, i);
+  int numberOfBlocks = 512;
+  int elementsPerBlock = number_of_elements/numberOfBlocks;
+
+  cudaEvent_t event;
+  cudaEventCreate(&event);
+
+  cudaMalloc((void **) &arr, sizeof(float)*number_of_elements);
+  cudaMalloc((void **) &final, sizeof(float)*number_of_elements);
+  cudaMemcpy(arr, a, sizeof(float)*number_of_elements, cudaMemcpyHostToDevice);
+
+  dim3 dimGrid(numberOfBlocks);
+  dim3 dimBlock(1);
+
+  int partition;
+  // int partitions;
+
+  int cnt = 0;
+  // n = number_of_elements;
+  // while (n != 0){
+  //   ++partitions;
+  //   n/=2;
+  // } 
+
+
+  // for (part = 0; part < partitions; part++){
+  //   int part_size = part << 1;
+  //   merge_sort<<<dimGrid, dimBlock>>>(arr, final, numberOfBlocks, elementsPerBlock, part); 
+  // } 
+
+
+  for (partition = 2; partition < 2*number_of_elements; partition*=2) {
+      merge_sort<<<dimGrid, dimBlock>>>(arr, final, numberOfBlocks, elementsPerBlock, partition); 
+    else
+      merge_sort<<<dimGrid, dimBlock>>>(final, arr, numberOfBlocks, elementsPerBlock, partition);
+    cnt+=1; 
   }
+
+  print("cnt: %d", cnt);
+  cudaMemcpy(a, final, sizeof(float)*number_of_elements, cudaMemcpyDeviceToHost);
+  // cudaFree(gpu_arr);
+  cudaThreadSynchronize();
+  cudaEventSynchronize(event);
   
-  cudaMemcpy( a, input_buf, sizeof(float) * number_of_elements, cudaMemcpyDeviceToHost);
-
-  cudaFree(input_buf);
-  cudaFree(tmp_buf);
-
   return 0;
 }
 
