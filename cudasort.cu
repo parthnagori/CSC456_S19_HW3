@@ -15,7 +15,7 @@ __device__ void merge(float* arr, float* final, int start, int mid, int end)
     int i = start;
     int j = mid;
     int k = start;
-    print("start : %d mid: %d end: %d", start, mid, end);
+    printf("start : %d mid: %d end: %d", start, mid, end);
     while (k < end)
     {
       if (i==mid){
