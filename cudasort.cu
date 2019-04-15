@@ -4,7 +4,7 @@
   #endif
 
 
-__global__ void bitonic_sort(float *arr, int j, int k)
+__global__ void bitonic_sort_step(float *gpu_val, int j, int k)
 {
   unsigned int i, ij; 
     i = threadIdx.x + blockDim.x * blockIdx.x;
@@ -12,31 +12,32 @@ __global__ void bitonic_sort(float *arr, int j, int k)
 
   if ((ij)>i) {
     if ((i&k)==0) {
-      if (arr[i]>arr[ij]) {
-        float temp = arr[i];
-        arr[i] = arr[ij];
-        arr[ij] = temp;
+      if (gpu_val[i]>gpu_val[ij]) {
+        float temp = gpu_val[i];
+        gpu_val[i] = gpu_val[ij];
+        gpu_val[ij] = temp;
       }
     }
     if ((i&k)!=0) {
-      if (arr[i]<arr[ij]) {
-        float temp = arr[i];
-        arr[i] = arr[ij];
-        arr[ij] = temp;
+      if (gpu_val[i]<gpu_val[ij]) {
+        float temp = gpu_val[i];
+        gpu_val[i] = gpu_val[ij];
+        gpu_val[ij] = temp;
       }
     }
   }
 }
 
 
-int cuda_sort(int number_of_elements, float *a)
+int cuda_sort(int number_of_elements, float *values)
 {
   
-  float *arr;
-  
-  cudaMalloc((void **) &arr, sizeof(float)*number_of_elements);
-  cudaMemcpy(arr, a, sizeof(float)*number_of_elements, cudaMemcpyHostToDevice);
+  float *gpu_arr;
+  size_t size = number_of_elements * sizeof(float);
 
+  cudaMalloc((void**) &gpu_arr, size);
+  cudaMemcpy(gpu_arr, values, size, cudaMemcpyHostToDevice);
+  
   int threads_create = 0;
   int blocks_create = 0;
    if(number_of_elements % 512 == 0)
@@ -52,18 +53,17 @@ int cuda_sort(int number_of_elements, float *a)
   threads_create = number_of_elements%512;
   blocks_create = number_of_elements/512;
   }
-  // printf("threads : %d, blocks: %d", threads_create, blocks_create);
   dim3 blocks(blocks_create,1);    /* Number of blocks   */
   dim3 threads(threads_create,1);  /* Number of threads  */
 
   int l, m;
   for (l = 2; l <= number_of_elements; l <<= 1) {
     for (m=l>>1; m>0; m=m>>1) {
-      bitonic_sort<<<blocks, threads>>>(arr, m, l);
+      bitonic_sort_step<<<blocks, threads>>>(gpu_arr, m, l);
     }
   }
-  cudaMemcpy(a, arr, sizeof(float)*number_of_elements, cudaMemcpyHostToDevice);
-  cudaFree(arr);
+  cudaMemcpy(values, gpu_arr, size, cudaMemcpyDeviceToHost);
+  cudaFree(gpu_arr);
 
   return 0;
 }
