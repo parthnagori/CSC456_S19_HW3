@@ -4,7 +4,7 @@
   #endif
 
 
-__global__ void bitonic_sort(float *gpu_val, int j, int k)
+__global__ void bitonic_sort(float *arr, int j, int k)
 {
   unsigned int i, ij; 
     i = threadIdx.x + blockDim.x * blockIdx.x;
@@ -12,17 +12,17 @@ __global__ void bitonic_sort(float *gpu_val, int j, int k)
 
   if ((ij)>i) {
     if ((i&k)==0) {
-      if (gpu_val[i]>gpu_val[ij]) {
-        float temp = gpu_val[i];
-        gpu_val[i] = gpu_val[ij];
-        gpu_val[ij] = temp;
+      if (arr[i]>arr[ij]) {
+        float temp = arr[i];
+        arr[i] = arr[ij];
+        arr[ij] = temp;
       }
     }
     if ((i&k)!=0) {
-      if (gpu_val[i]<gpu_val[ij]) {
-        float temp = gpu_val[i];
-        gpu_val[i] = gpu_val[ij];
-        gpu_val[ij] = temp;
+      if (arr[i]<arr[ij]) {
+        float temp = arr[i];
+        arr[i] = arr[ij];
+        arr[ij] = temp;
       }
     }
   }
@@ -52,7 +52,7 @@ int cuda_sort(int number_of_elements, float *a)
   threads_create = number_of_elements%512;
   blocks_create = number_of_elements/512;
   }
-  printf("threads : %d, blocks: %d", threads_create, blocks_create);
+  // printf("threads : %d, blocks: %d", threads_create, blocks_create);
   dim3 blocks(blocks_create,1);    /* Number of blocks   */
   dim3 threads(threads_create,1);  /* Number of threads  */
 
