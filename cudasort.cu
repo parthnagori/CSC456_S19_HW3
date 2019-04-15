@@ -101,7 +101,7 @@ int cuda_sort(int number_of_elements, float *a)
   }
 
   printf("\ncnt: %d", cnt);
-  cudaMemcpy(a, arr, sizeof(float)*number_of_elements, cudaMemcpyDeviceToHost);
+  cudaMemcpy(a, final, sizeof(float)*number_of_elements, cudaMemcpyDeviceToHost);
   // cudaFree(gpu_arr);
   cudaThreadSynchronize();
   cudaEventSynchronize(event);
