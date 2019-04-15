@@ -15,7 +15,7 @@ __device__ void merge(float* arr, float* final, int start, int mid, int end)
     int i = start;
     int j = mid;
     int k = start;
-    // printf("start : %d mid: %d end: %d", start, mid, end);
+    printf("start : %d mid: %d end: %d", start, mid, end);
     while (k < end)
     {
       if (i==mid){
@@ -42,13 +42,14 @@ __device__ void merge(float* arr, float* final, int start, int mid, int end)
 
 __global__ void merge_sort(float* arr, float* final, int numberOfBlocks, int elementsPerBlock, int partition){
 
-    int n = numberOfBlocks * elementsPerBlock;
     int block_id = threadIdx.x + blockIdx.x * blockDim.x;
     int start = block_id * partition;
-    int end = min(start + partition, n) ;
-    int mid = min(start + partition/2, n);
-
-    merge(arr, final, start, mid, end);
+    int n = numberOfBlocks*elementsPerBlock;
+    if (start < n){
+      int end = min(start + partition,n);
+      int mid = min(start + partition/2,n);
+      merge(arr, final, start, mid, end);
+    }
 }
 
 int cuda_sort(int number_of_elements, float *a)
@@ -96,7 +97,7 @@ int cuda_sort(int number_of_elements, float *a)
     // cnt+=1; 
   }
 
-  cudaMemcpy(a, arr, sizeof(float)*number_of_elements, cudaMemcpyDeviceToHost);
+  cudaMemcpy(a, final, sizeof(float)*number_of_elements, cudaMemcpyDeviceToHost);
   // cudaFree(gpu_arr);
   cudaThreadSynchronize();
   cudaEventSynchronize(event);
