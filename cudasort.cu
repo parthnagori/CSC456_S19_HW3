@@ -34,8 +34,8 @@ __global__ void merge_sort(float* arr, float* final, int numberOfBlocks, int ele
 
     int block_id = blockIdx.x;   
     int start = block_id * partition;
-    int end = start + partition;
-    int mid = start + partition/2;
+    int end = min(start + partition, numberOfBlocks*elementsPerBlock) ;
+    int mid = min(start + partition/2, numberOfBlocks*elementsPerBlock);
 
     merge(arr, final, start, mid, end);
 }
