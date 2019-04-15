@@ -41,8 +41,8 @@ int cuda_sort(int number_of_elements, float *a)
   
   float *arr;
   
-  cudaEvent_t event;
-  cudaEventCreate(&event);
+  // cudaEvent_t event;
+  // cudaEventCreate(&event);
 
   cudaMalloc((void**) &arr, number_of_elements * sizeof(float));
   cudaMemcpy(arr, a, number_of_elements * sizeof(float), cudaMemcpyHostToDevice);
@@ -60,8 +60,8 @@ int cuda_sort(int number_of_elements, float *a)
 
   cudaMemcpy(a, arr, number_of_elements * sizeof(float), cudaMemcpyDeviceToHost);
   cudaFree(arr);
-  cudaThreadSynchronize();
-  cudaEventSynchronize(event);
+  // cudaThreadSynchronize();
+  // cudaEventSynchronize(event);
 
   return 0;
 }
