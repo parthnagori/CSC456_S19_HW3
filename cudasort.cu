@@ -3,7 +3,7 @@
 #include <time.h>
 #include <assert.h>
 #include <sys/time.h>
-
+#include <bits/stdc++.h> 
 #define THREADS 512
 #ifdef __cplusplus
 extern "C"
@@ -13,24 +13,15 @@ extern "C"
 
 __global__ void bitonic_sort(float *arr, int k, int j)
 {
-  unsigned int i, ij; 
-    i = threadIdx.x + blockDim.x * blockIdx.x;
-  ij = i^j;
+  int ij; 
+  int index = threadIdx.x + blockDim.x * blockIdx.x;
+  ij = index^j;
 
-  if ((ij)>i) {
-    if ((i&k)==0) {
-      if (arr[i]>arr[ij]) {
-        float temp = arr[i];
-        arr[i] = arr[ij];
+  if ((ij)>index) {
+    if (((index & k)==0) && (arr[index]>arr[ij])) || (((index & k)!=0) && (arr[index]<arr[ij])) {
+        float temp = arr[index];
+        arr[index] = arr[ij];
         arr[ij] = temp;
-      }
-    }
-    if ((i&k)!=0) {
-      if (arr[i]<arr[ij]) {
-        float temp = arr[i];
-        arr[i] = arr[ij];
-        arr[ij] = temp;
-      }
     }
   }
 }
@@ -48,8 +39,10 @@ int cuda_sort(int number_of_elements, float *a)
   dim3 dimBlock(512,1);
 
   for (int i = 2; i <= number_of_elements; i*=2) {
-    for (int j = i/2 ; j > 0; j/=2) {
+    int j = i/2;
+    while (j > 0){
       bitonic_sort<<<dimGrid, dimBlock>>>(arr, i, j);
+      j/=2;
     }
   }
   cudaMemcpy(a, arr, number_of_elements * sizeof(float), cudaMemcpyDeviceToHost);
