@@ -12,8 +12,7 @@ extern "C"
 
 __global__ void bitonic_sort(float *arr, int i, int j)
 {
-  int index = blockIdx.x * blockDim.x + threadIdx.x;
-  // printf("\nidx : %d dim: %d th: %d",blockIdx.x, blockDim.x, threadIdx.x);
+  int index = blockIdx.x;
   int k = index ^ j;
   int l = index & i;
   float temp;
@@ -36,14 +35,16 @@ int cuda_sort(int number_of_elements, float *a)
   cudaMemcpy(arr, a, number_of_elements * sizeof(float), cudaMemcpyHostToDevice);
   
   dim3 dimGrid(number_of_elements/THREADS);
-  dim3 dimBlock(THREADS);
-
-  for (int i = 2; i <= number_of_elements; i*=2) {
+  dim3 dimBlock(1);
+  
+  int i = 2;
+  while (i <= number_of_elements) {
     int j = i/2;
     while (j > 0){
       bitonic_sort<<<dimGrid, dimBlock>>>(arr, i, j);
       j/=2;
     }
+    i*=2;
   }
   cudaMemcpy(a, arr, number_of_elements * sizeof(float), cudaMemcpyDeviceToHost);
   cudaFree(arr);
