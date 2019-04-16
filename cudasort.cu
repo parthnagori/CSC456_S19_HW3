@@ -47,8 +47,8 @@ int cuda_sort(int number_of_elements, float *a)
   dim3 dimGrid(number_of_elements/512,1);
   dim3 dimBlock(512,1);
 
-  for (int i = 2; i <= number_of_elements; i <<= 1) {
-    for (int j= i>>1 ; j>0; j = j>>1) {
+  for (int i = 2; i <= number_of_elements; i*=2) {
+    for (int j = i/2 ; j > 0; j/=2) {
       bitonic_sort<<<dimGrid, dimBlock>>>(arr, i, j);
     }
   }
