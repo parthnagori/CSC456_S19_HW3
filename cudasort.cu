@@ -18,7 +18,7 @@ __global__ void bitonic_sort(float *arr, int k, int j)
   ij = index^j;
 
   if ((ij)>index) {
-    if (((index & k)==0) && (arr[index]>arr[ij])) || (((index & k)!=0) && (arr[index]<arr[ij])) {
+    if ((((index & k)==0) && (arr[index]>arr[ij])) || (((index & k)!=0) && (arr[index]<arr[ij]))) {
         float temp = arr[index];
         arr[index] = arr[ij];
         arr[ij] = temp;
