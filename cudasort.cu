@@ -11,7 +11,7 @@ extern "C"
 #endif
 
 
-__global__ void bitonic_sort(float *arr, int j, int k)
+__global__ void bitonic_sort(float *arr, int k, int j)
 {
   unsigned int i, ij; 
     i = threadIdx.x + blockDim.x * blockIdx.x;
@@ -44,13 +44,12 @@ int cuda_sort(int number_of_elements, float *a)
   cudaMalloc((void**) &arr, number_of_elements * sizeof(float));
   cudaMemcpy(arr, a, number_of_elements * sizeof(float), cudaMemcpyHostToDevice);
   
-  dim3 dimGrid(number_of_elements/512,1);    /* Number of blocks   */
-  dim3 dimBlock(512,1);  /* Number of threads  */
+  dim3 dimGrid(number_of_elements/512,1);
+  dim3 dimBlock(512,1);
 
-  int l, m;
-  for (l = 2; l <= number_of_elements; l <<= 1) {
-    for (m=l>>1; m>0; m=m>>1) {
-      bitonic_sort<<<dimGrid, dimBlock>>>(arr, m, l);
+  for (int i = 2; i <= number_of_elements; i <<= 1) {
+    for (int j= i>>1 ; j>0; j = j>>1) {
+      bitonic_sort<<<dimGrid, dimBlock>>>(arr, i, j);
     }
   }
   cudaMemcpy(a, arr, number_of_elements * sizeof(float), cudaMemcpyDeviceToHost);
