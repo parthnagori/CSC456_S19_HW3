@@ -12,14 +12,15 @@ extern "C"
 
 __global__ void bitonic_sort(float *arr, int i, int j)
 {
-  int index = threadIdx.x + blockDim.x * blockIdx.x;
+  int index = blockIdx.x * blockDim.x + threadIdx.x;
+  printf("\nidx : %d dim: %d th: %d",blockIdx.x, blockDim.x, threadIdx.x);
   int k = index^j;
   float temp;
   if ((k) > index) {
     if ((((index & i)==0) && (arr[index]>arr[k])) || (((index & i)!=0) && (arr[index]<arr[k]))) {
-        temp = arr[index];
-        arr[index] = arr[k];
-        arr[k] = temp;
+      temp = arr[index];
+      arr[index] = arr[k];
+      arr[k] = temp;
     }
   }
 }
@@ -33,8 +34,8 @@ int cuda_sort(int number_of_elements, float *a)
   cudaMalloc((void**) &arr, number_of_elements * sizeof(float));
   cudaMemcpy(arr, a, number_of_elements * sizeof(float), cudaMemcpyHostToDevice);
   
-  dim3 dimGrid(number_of_elements/512);
-  dim3 dimBlock(512);
+  dim3 dimGrid(number_of_elements/THREADS);
+  dim3 dimBlock(THREADS);
 
   for (int i = 2; i <= number_of_elements; i*=2) {
     int j = i/2;
