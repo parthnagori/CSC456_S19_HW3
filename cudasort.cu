@@ -13,14 +13,14 @@ extern "C"
 __global__ void bitonic_sort(float *arr, int i, int j)
 {
   int index = blockIdx.x * blockDim.x + threadIdx.x;
-  int k = index ^ j;
-  int l = index & i;
+  int p = index ^ j;
+  int q = index & i;
   float temp;
-  if (k > index) {    
-    if (((l==0) && (arr[index]>arr[k])) || ((l!=0) && (arr[index]<arr[k]))) {
+  if (p > index) {    
+    if (((q==0) && (arr[index]>arr[p])) || ((q!=0) && (arr[index]<arr[p]))) {
       temp = arr[index];
-      arr[index] = arr[k];
-      arr[k] = temp;
+      arr[index] = arr[p];
+      arr[p] = temp;
     }
   }
 }
