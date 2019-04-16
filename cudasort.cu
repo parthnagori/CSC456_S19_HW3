@@ -13,11 +13,12 @@ extern "C"
 __global__ void bitonic_sort(float *arr, int i, int j)
 {
   int index = blockIdx.x * blockDim.x + threadIdx.x;
-  printf("\nidx : %d dim: %d th: %d",blockIdx.x, blockDim.x, threadIdx.x);
-  int k = index^j;
+  // printf("\nidx : %d dim: %d th: %d",blockIdx.x, blockDim.x, threadIdx.x);
+  int k = index ^ j;
+  int l = index & i;
   float temp;
-  if ((k) > index) {
-    if ((((index & i)==0) && (arr[index]>arr[k])) || (((index & i)!=0) && (arr[index]<arr[k]))) {
+  if (k > index) {    
+    if (((l==0) && (arr[index]>arr[k])) || ((l!=0) && (arr[index]<arr[k]))) {
       temp = arr[index];
       arr[index] = arr[k];
       arr[k] = temp;
