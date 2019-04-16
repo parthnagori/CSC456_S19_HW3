@@ -33,8 +33,8 @@ int cuda_sort(int number_of_elements, float *a)
   cudaMalloc((void**) &arr, number_of_elements * sizeof(float));
   cudaMemcpy(arr, a, number_of_elements * sizeof(float), cudaMemcpyHostToDevice);
   
-  dim3 dimGrid(number_of_elements/512,1);
-  dim3 dimBlock(512,1);
+  dim3 dimGrid(number_of_elements/512);
+  dim3 dimBlock(512);
 
   for (int i = 2; i <= number_of_elements; i*=2) {
     int j = i/2;
