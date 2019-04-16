@@ -12,7 +12,7 @@ extern "C"
 
 __global__ void bitonic_sort(float *arr, int i, int j)
 {
-  int index = blockIdx.x;
+  int index = blockIdx.x * blockDim.x + threadIdx.x;
   int k = index ^ j;
   int l = index & i;
   float temp;
