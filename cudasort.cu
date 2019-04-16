@@ -41,15 +41,11 @@ int cuda_sort(int number_of_elements, float *a)
   
   float *arr;
   
-  // cudaEvent_t event;
-  // cudaEventCreate(&event);
-
   cudaMalloc((void**) &arr, number_of_elements * sizeof(float));
   cudaMemcpy(arr, a, number_of_elements * sizeof(float), cudaMemcpyHostToDevice);
   
-  
-  dim3 dimGrid(512,1);    
-  dim3 dimBlock(number_of_elements/512,1);
+  dim3 dimGrid(number_of_elements/512,1);    /* Number of blocks   */
+  dim3 dimBlock(512,1);  /* Number of threads  */
 
   int l, m;
   for (l = 2; l <= number_of_elements; l <<= 1) {
@@ -57,11 +53,8 @@ int cuda_sort(int number_of_elements, float *a)
       bitonic_sort<<<dimGrid, dimBlock>>>(arr, m, l);
     }
   }
-
   cudaMemcpy(a, arr, number_of_elements * sizeof(float), cudaMemcpyDeviceToHost);
   cudaFree(arr);
-  // cudaThreadSynchronize();
-  // cudaEventSynchronize(event);
 
   return 0;
 }
