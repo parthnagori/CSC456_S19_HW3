@@ -3,7 +3,6 @@
 #include <time.h>
 #include <assert.h>
 #include <sys/time.h>
-#include <bits/stdc++.h> 
 #define THREADS 512
 #ifdef __cplusplus
 extern "C"
@@ -11,19 +10,16 @@ extern "C"
 #endif
 
 
-__global__ void bitonic_sort(float *arr, int k, int j)
+__global__ void bitonic_sort(float *arr, int i, int j)
 {
-  int ij; 
   int index = threadIdx.x + blockDim.x * blockIdx.x;
-  ij = index^j;
-
-  if ((ij)>index) {
-    if ((((index & k)==0) && (arr[index]>arr[ij])) || (((index & k)!=0) && (arr[index]<arr[ij]))) {
-        swap(arr[index], arr[ij]);
-
-        // float temp = arr[index];
-        // arr[index] = arr[ij];
-        // arr[ij] = temp;
+  int k = index^j;
+  float temp;
+  if ((k) > index) {
+    if ((((index & i)==0) && (arr[index]>arr[k])) || (((index & i)!=0) && (arr[index]<arr[k]))) {
+        temp = arr[index];
+        arr[index] = arr[k];
+        arr[k] = temp;
     }
   }
 }
