@@ -35,7 +35,7 @@ int cuda_sort(int number_of_elements, float *a)
   cudaMemcpy(arr, a, number_of_elements * sizeof(float), cudaMemcpyHostToDevice);
   
   dim3 dimGrid(number_of_elements/THREADS);
-  dim3 dimBlock(1);
+  dim3 dimBlock(THREADS);
   
   int i = 2;
   while (i <= number_of_elements) {
